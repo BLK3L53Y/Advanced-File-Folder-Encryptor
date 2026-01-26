@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced File & Folder Encryptor</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2a2a2a;
+            --bg-tertiary: #333333;
+            --accent-primary: #0d7377;
+            --accent-secondary: #2a9d8f;
+            --accent-hover: #14b8a6;
+            --text-primary: #e8e8e8;
+            --text-secondary: #b0b0b0;
+            --text-muted: #888888;
+            --border-color: #404040;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --teal-highlight: #0d7377;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: linear-gradient(135deg, #1a1a1a 0%, #252525 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 1rem;
+            padding: 1.25rem 1.5rem;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+        }
+
+        h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.85rem;
+            font-weight: 800;
+            margin-bottom: 0.4rem;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .badges {
+            display: flex;
+            gap: 0.6rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 0.6rem;
+        }
+
+        .badge {
+            background: var(--bg-tertiary);
+            padding: 0.4rem 0.85rem;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            border: 1px solid var(--border-color);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .badge.security {
+            background: linear-gradient(135deg, rgba(13, 115, 119, 0.2), rgba(42, 157, 143, 0.2));
+            border-color: var(--accent-primary);
+            color: var(--accent-hover);
+        }
+
+        .creator-badge {
+            display: inline-block;
+            background: var(--bg-tertiary);
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .creator-badge:hover {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
+        }
+
+        .manual-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .manual-btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(13, 115, 119, 0.3);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .section {
+            background: var(--bg-secondary);
+            padding: 1.25rem;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-2px);
+        }
+
+        .section-header {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-header::before {
+            content: '';
+            width: 4px;
+            height: 1.5rem;
+            background: var(--accent-primary);
+            border-radius: 2px;
+        }
+
+        .section.decrypt .section-header::before {
+            background: var(--accent-secondary);
+        }
+
+        .mode-toggle {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.85rem;
+            background: var(--bg-tertiary);
+            padding: 0.4rem;
+            border-radius: 10px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 0.6rem 0.85rem;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .mode-btn.active {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .mode-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .file-input-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(13, 115, 119, 0.05);
+        }
+
+        .file-input-area:hover {
+            border-color: var(--accent-primary);
+            background: rgba(13, 115, 119, 0.1);
+        }
+
+        .file-input-area.has-file {
+            border-color: var(--accent-primary);
+            background: rgba(13, 115, 119, 0.15);
+        }
+
+        .file-input-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .file-name {
+            color: var(--accent-hover);
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+
+        .file-list {
+            max-height: 150px;
+            overflow-y: auto;
+            margin-top: 1rem;
+            padding: 0.5rem;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .file-list-item {
+            padding: 0.3rem 0;
+            color: var(--text-secondary);
+        }
+
+        .form-group {
+            margin-bottom: 0.85rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        input[type="password"],
+        input[type="text"] {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        input[type="password"]:focus,
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(13, 115, 119, 0.1);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.85rem;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--accent-primary);
+        }
+
+        .checkbox-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.85rem;
+            border: none;
+            border-radius: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(13, 115, 119, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--accent-secondary), var(--accent-hover));
+            color: white;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(42, 157, 143, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .progress-container {
+            margin-top: 0.85rem;
+            display: none;
+        }
+
+        .progress-container.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .tpi-info {
+            background: linear-gradient(135deg, rgba(13, 115, 119, 0.15), rgba(42, 157, 143, 0.15));
+            border: 1px solid var(--accent-primary);
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .tpi-info h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            color: var(--accent-hover);
+            margin-bottom: 0.4rem;
+        }
+
+        .tpi-info p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+            line-height: 1.5;
+        }
+
+        .tpi-highlight {
+            color: var(--accent-hover);
+            font-weight: 500;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            max-width: 700px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .manual-modal-content {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            max-width: 900px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 2.5rem;
+        }
+
+        #manualContent h2, #manualContent h3 {
+            line-height: 1.3;
+        }
+
+        #manualContent ul, #manualContent ol {
+            margin-left: 0;
+            padding-left: 1.5rem;
+        }
+
+        #manualContent li {
+            margin-bottom: 0.3rem;
+        }
+
+        .modal-header {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--accent-hover);
+        }
+
+        .modal-close {
+            float: right;
+            background: var(--bg-tertiary);
+            border: none;
+            color: var(--text-primary);
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            line-height: 1;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--error);
+            color: white;
+        }
+
+        .file-browser {
+            margin: 1.5rem 0;
+        }
+
+        .file-browser-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .file-browser-item:hover {
+            background: rgba(13, 115, 119, 0.1);
+        }
+
+        .file-browser-item input[type="checkbox"] {
+            margin: 0;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-path {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            word-break: break-all;
+        }
+
+        .file-size {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .download-btn-small {
+            padding: 0.5rem 1rem;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn-small:hover {
+            background: var(--accent-hover);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .modal-actions button {
+            flex: 1;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1.25rem 2rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .footer-specs {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .layer-toggle {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.85rem;
+            background: var(--bg-tertiary);
+            padding: 0.4rem;
+            border-radius: 10px;
+        }
+
+        .layer-btn {
+            flex: 1;
+            padding: 0.6rem 0.85rem;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .layer-btn.active {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .layer-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .password-warning {
+            color: var(--warning);
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .password-warning.active {
+            display: block;
+        }
+
+        .select-all-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .select-all-controls button {
+            padding: 0.5rem 1rem;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .select-all-controls button:hover {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-primary);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-hover);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <button class="manual-btn" onclick="openManual()">📖 User Manual</button>
+            <h1>🔐 <span style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Advanced File & Folder Encryptor</span></h1>
+            <p class="subtitle">Military-grade encryption for files and folders with Two-Person Integrity support</p>
+            <div class="badges">
+                <span class="badge security">AES-256-GCM</span>
+                <span class="badge security">📁 Folder Support</span>
+                <span class="badge security">Single/Double Encryption</span>
+                <span class="badge security">600K Iterations PBKDF2</span>
+            </div>
+        </header>
+
+        <div class="tpi-info">
+            <h3>🤝 Two-Person Integrity (TPI) Mode</h3>
+            <p><strong class="tpi-highlight">Double-layer encryption with two people = split custody.</strong> Neither person can decrypt alone - both passwords are required. Perfect for sensitive data requiring two-party authorization.</p>
+            <p><strong>Enhanced Security Mode:</strong> Use double-layer with two different passwords (same person) for maximum protection against attacks.</p>
+        </div>
+
+        <div class="main-grid">
+            <!-- ENCRYPT SECTION -->
+            <div class="section encrypt">
+                <h2 class="section-header">🔒 Encrypt</h2>
+                
+                <div class="mode-toggle">
+                    <button class="mode-btn active" onclick="setEncryptMode('file')">📄 Single File</button>
+                    <button class="mode-btn" onclick="setEncryptMode('folder')">📁 Folder</button>
+                </div>
+
+                <div class="file-input-area" id="encryptInputArea" onclick="document.getElementById('encryptFileInput').click()">
+                    <div class="file-input-label" id="encryptInputLabel">Click to select file</div>
+                    <div class="file-name" id="encryptFileName"></div>
+                    <div class="file-list" id="encryptFileList"></div>
+                </div>
+                <input type="file" id="encryptFileInput" style="display: none;">
+                <input type="file" id="encryptFolderInput" webkitdirectory directory style="display: none;">
+
+                <div class="form-group">
+                    <label class="form-label">Encryption Strength</label>
+                    <div class="layer-toggle">
+                        <button class="layer-btn active" onclick="setEncryptLayer('single')">🔒 Single Layer</button>
+                        <button class="layer-btn" onclick="setEncryptLayer('double')">🔒🔒 Double Layer</button>
+                    </div>
+                </div>
+
+                <div id="encryptPassword1Group" class="form-group">
+                    <label class="form-label" id="encryptPassword1Label">Password</label>
+                    <input type="password" id="encryptPassword1" placeholder="Enter strong password">
+                    <div class="password-warning" id="encryptPass1Warning">⚠️ Password should be at least 8 characters</div>
+                </div>
+
+                <div id="encryptPassword2Group" class="form-group" style="display: none;">
+                    <label class="form-label">Password 2 - Person B (Outer Layer)</label>
+                    <input type="password" id="encryptPassword2" placeholder="Enter second password">
+                    <div class="password-warning" id="encryptPass2Warning">⚠️ Password should be at least 8 characters</div>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="remindDeleteOriginal" checked>
+                    <label class="checkbox-label" for="remindDeleteOriginal">Remind to delete original files</label>
+                </div>
+
+                <button class="btn btn-primary" id="encryptBtn" onclick="encryptFile()">🔒 Encrypt</button>
+
+                <div class="progress-container" id="encryptProgress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="encryptProgressFill"></div>
+                    </div>
+                    <div class="progress-text" id="encryptProgressText">Processing...</div>
+                </div>
+            </div>
+
+            <!-- DECRYPT SECTION -->
+            <div class="section decrypt">
+                <h2 class="section-header">🔓 Decrypt</h2>
+
+                <div class="file-input-area" id="decryptInputArea" onclick="document.getElementById('decryptFileInput').click()">
+                    <div class="file-input-label">Click to select encrypted file (.enc or .enc2)</div>
+                    <div class="file-name" id="decryptFileName"></div>
+                </div>
+                <input type="file" id="decryptFileInput" accept=".enc,.enc2" style="display: none;">
+
+                <div id="decryptPassword1Group" class="form-group" style="display: none;">
+                    <label class="form-label" id="decryptPassword1Label">Password</label>
+                    <input type="password" id="decryptPassword1" placeholder="Enter password">
+                </div>
+
+                <div id="decryptPassword2Group" class="form-group" style="display: none;">
+                    <label class="form-label" id="decryptPassword2Label">Password 2 - Person B (Outer Layer)</label>
+                    <input type="password" id="decryptPassword2" placeholder="Enter outer layer password">
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="remindDeleteEncrypted" checked>
+                    <label class="checkbox-label" for="remindDeleteEncrypted">Remind to delete encrypted file</label>
+                </div>
+
+                <button class="btn btn-secondary" id="decryptBtn" onclick="decryptFile()" disabled>🔓 Decrypt</button>
+
+                <div class="progress-container" id="decryptProgress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="decryptProgressFill"></div>
+                    </div>
+                    <div class="progress-text" id="decryptProgressText">Processing...</div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div>🔐 Advanced File & Folder Encryptor | <a href="https://github.com/BLK3L53Y" target="_blank" class="creator-badge" style="text-decoration: none;">Created by BLK3L53Y · GitHub</a></div>
+            <div class="footer-specs">AES-256-GCM | PBKDF2 (600,000 iterations) | SHA-256 | Client-side only</div>
+        </footer>
+    </div>
+
+    <!-- Delete Original Modal -->
+    <div class="modal" id="deleteOriginalModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('deleteOriginalModal')">×</button>
+            <h3 class="modal-header">🗑️ Security Reminder</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">Your file has been encrypted successfully. For maximum security, you should delete the original unencrypted file.</p>
+            <p style="color: var(--warning); font-size: 0.9rem;">⚠️ Keep only the encrypted version to prevent unauthorized access.</p>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="closeModal('deleteOriginalModal')">Got it</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Encrypted Modal -->
+    <div class="modal" id="deleteEncryptedModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('deleteEncryptedModal')">×</button>
+            <h3 class="modal-header">🗑️ Security Reminder</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">Your file has been decrypted successfully. You can now safely delete the encrypted version if you no longer need it.</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('deleteEncryptedModal')">Got it</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Folder Browser Modal -->
+    <div class="modal" id="folderBrowserModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('folderBrowserModal')">×</button>
+            <h3 class="modal-header">📁 Decrypted Files</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">Select files to download:</p>
+            
+            <div class="select-all-controls">
+                <button onclick="selectAllFiles()">Select All</button>
+                <button onclick="deselectAllFiles()">Deselect All</button>
+            </div>
+
+            <div class="file-browser" id="fileBrowserList"></div>
+
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="downloadSelectedFiles()">💾 Download Selected Files</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Manual Modal -->
+    <div class="modal" id="manualModal">
+        <div class="manual-modal-content">
+            <button class="modal-close" onclick="closeModal('manualModal')">×</button>
+            <div id="manualContent"></div>
+        </div>
+    </div>
+
+    <script>
+        let encryptMode = 'file';
+        let encryptLayer = 'single';
+        let decryptedFolderFiles = [];
+
+        // Mode toggles
+        function setEncryptMode(mode) {
+            encryptMode = mode;
+            document.querySelectorAll('.mode-toggle .mode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const fileInput = document.getElementById('encryptFileInput');
+            const folderInput = document.getElementById('encryptFolderInput');
+            const label = document.getElementById('encryptInputLabel');
+            const fileList = document.getElementById('encryptFileList');
+
+            if (mode === 'folder') {
+                label.textContent = 'Click to select folder';
+                document.getElementById('encryptInputArea').onclick = () => folderInput.click();
+            } else {
+                label.textContent = 'Click to select file';
+                fileList.innerHTML = '';
+                fileList.style.display = 'none';
+                document.getElementById('encryptInputArea').onclick = () => fileInput.click();
+            }
+
+            document.getElementById('encryptFileName').textContent = '';
+            document.getElementById('encryptInputArea').classList.remove('has-file');
+        }
+
+        function setEncryptLayer(layer) {
+            encryptLayer = layer;
+            document.querySelectorAll('.layer-toggle .layer-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const pass1Label = document.getElementById('encryptPassword1Label');
+            const pass2Group = document.getElementById('encryptPassword2Group');
+
+            if (layer === 'double') {
+                pass1Label.textContent = 'Password 1 - Person A (Inner Layer)';
+                pass2Group.style.display = 'block';
+            } else {
+                pass1Label.textContent = 'Password';
+                pass2Group.style.display = 'none';
+                document.getElementById('encryptPassword2').value = '';
+            }
+        }
+
+        // File input handlers
+        document.getElementById('encryptFileInput').addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                document.getElementById('encryptFileName').textContent = `📄 ${file.name} (${formatFileSize(file.size)})`;
+                document.getElementById('encryptInputArea').classList.add('has-file');
+            }
+        });
+
+        document.getElementById('encryptFolderInput').addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                const files = Array.from(e.target.files);
+                const folderName = files[0].webkitRelativePath.split('/')[0];
+                const totalSize = files.reduce((sum, f) => sum + f.size, 0);
+                
+                document.getElementById('encryptFileName').textContent = `📁 ${folderName} (${files.length} files, ${formatFileSize(totalSize)})`;
+                document.getElementById('encryptInputArea').classList.add('has-file');
+                
+                const fileList = document.getElementById('encryptFileList');
+                fileList.innerHTML = files.slice(0, 10).map(f => 
+                    `<div class="file-list-item">📄 ${f.webkitRelativePath}</div>`
+                ).join('');
+                if (files.length > 10) {
+                    fileList.innerHTML += `<div class="file-list-item">... and ${files.length - 10} more files</div>`;
+                }
+                fileList.style.display = 'block';
+            }
+        });
+
+        document.getElementById('decryptFileInput').addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                const fileName = file.name;
+                const isDouble = fileName.endsWith('.enc2');
+                
+                document.getElementById('decryptFileName').textContent = `🔒 ${fileName} (${formatFileSize(file.size)})`;
+                document.getElementById('decryptInputArea').classList.add('has-file');
+                
+                // Show appropriate password fields
+                const pass1Group = document.getElementById('decryptPassword1Group');
+                const pass2Group = document.getElementById('decryptPassword2Group');
+                const pass1Label = document.getElementById('decryptPassword1Label');
+                const pass2Label = document.getElementById('decryptPassword2Label');
+                
+                pass1Group.style.display = 'block';
+                document.getElementById('decryptBtn').disabled = false;
+                
+                if (isDouble) {
+                    pass1Label.textContent = 'Password 1 - Person A (Inner Layer)';
+                    pass2Label.textContent = 'Password 2 - Person B (Outer Layer)';
+                    pass2Group.style.display = 'block';
+                } else {
+                    pass1Label.textContent = 'Password';
+                    pass2Group.style.display = 'none';
+                }
+            }
+        });
+
+        // Password validation
+        document.getElementById('encryptPassword1').addEventListener('input', function(e) {
+            const warning = document.getElementById('encryptPass1Warning');
+            warning.classList.toggle('active', e.target.value.length > 0 && e.target.value.length < 8);
+        });
+
+        document.getElementById('encryptPassword2').addEventListener('input', function(e) {
+            const warning = document.getElementById('encryptPass2Warning');
+            warning.classList.toggle('active', e.target.value.length > 0 && e.target.value.length < 8);
+        });
+
+        // Utility functions
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function updateProgress(id, percent, text) {
+            const container = document.getElementById(`${id}Progress`);
+            const fill = document.getElementById(`${id}ProgressFill`);
+            const textEl = document.getElementById(`${id}ProgressText`);
+            
+            container.classList.add('active');
+            fill.style.width = percent + '%';
+            textEl.textContent = text;
+
+            if (percent >= 100) {
+                setTimeout(() => {
+                    container.classList.remove('active');
+                    fill.style.width = '0%';
+                }, 2000);
+            }
+        }
+
+        // Crypto functions
+        async function deriveKey(password, salt) {
+            const encoder = new TextEncoder();
+            const passwordKey = await crypto.subtle.importKey(
+                'raw',
+                encoder.encode(password),
+                'PBKDF2',
+                false,
+                ['deriveBits', 'deriveKey']
+            );
+
+            return await crypto.subtle.deriveKey(
+                {
+                    name: 'PBKDF2',
+                    salt: salt,
+                    iterations: 600000,
+                    hash: 'SHA-256'
+                },
+                passwordKey,
+                { name: 'AES-GCM', length: 256 },
+                false,
+                ['encrypt', 'decrypt']
+            );
+        }
+
+        async function encryptData(data, password) {
+            const salt = crypto.getRandomValues(new Uint8Array(32));
+            const nonce = crypto.getRandomValues(new Uint8Array(12));
+            const key = await deriveKey(password, salt);
+
+            const encrypted = await crypto.subtle.encrypt(
+                { name: 'AES-GCM', iv: nonce },
+                key,
+                data
+            );
+
+            // Format: [salt][nonce][encrypted data]
+            const result = new Uint8Array(salt.length + nonce.length + encrypted.byteLength);
+            result.set(salt, 0);
+            result.set(nonce, salt.length);
+            result.set(new Uint8Array(encrypted), salt.length + nonce.length);
+
+            return result;
+        }
+
+        async function decryptData(encryptedData, password) {
+            const salt = encryptedData.slice(0, 32);
+            const nonce = encryptedData.slice(32, 44);
+            const data = encryptedData.slice(44);
+
+            const key = await deriveKey(password, salt);
+
+            return await crypto.subtle.decrypt(
+                { name: 'AES-GCM', iv: nonce },
+                key,
+                data
+            );
+        }
+
+        // Archive functions
+        function createArchive(files) {
+            let totalSize = 4; // 4 bytes for file count
+            const fileData = [];
+
+            for (const file of files) {
+                const pathBytes = new TextEncoder().encode(file.webkitRelativePath);
+                totalSize += 4 + pathBytes.length + 4 + file.size;
+                fileData.push({ file, pathBytes });
+            }
+
+            return new Promise((resolve, reject) => {
+                const archive = new Uint8Array(totalSize);
+                const view = new DataView(archive.buffer);
+                let offset = 0;
+
+                // Write file count
+                view.setUint32(offset, files.length, true);
+                offset += 4;
+
+                let filesRead = 0;
+
+                fileData.forEach(({ file, pathBytes }) => {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        const contentBytes = new Uint8Array(e.target.result);
+                        
+                        // Write path length
+                        view.setUint32(offset, pathBytes.length, true);
+                        offset += 4;
+                        
+                        // Write path
+                        archive.set(pathBytes, offset);
+                        offset += pathBytes.length;
+                        
+                        // Write content length
+                        view.setUint32(offset, contentBytes.length, true);
+                        offset += 4;
+                        
+                        // Write content
+                        archive.set(contentBytes, offset);
+                        offset += contentBytes.length;
+
+                        filesRead++;
+                        if (filesRead === files.length) {
+                            resolve(archive);
+                        }
+                    };
+
+                    reader.onerror = reject;
+                    reader.readAsArrayBuffer(file);
+                });
+            });
+        }
+
+        function extractArchive(archiveData) {
+            const view = new DataView(archiveData.buffer);
+            let offset = 0;
+
+            const fileCount = view.getUint32(offset, true);
+            offset += 4;
+
+            const files = [];
+            const decoder = new TextDecoder();
+
+            for (let i = 0; i < fileCount; i++) {
+                // Read path length
+                const pathLength = view.getUint32(offset, true);
+                offset += 4;
+
+                // Read path
+                const pathBytes = archiveData.slice(offset, offset + pathLength);
+                const path = decoder.decode(pathBytes);
+                offset += pathLength;
+
+                // Read content length
+                const contentLength = view.getUint32(offset, true);
+                offset += 4;
+
+                // Read content
+                const content = archiveData.slice(offset, offset + contentLength);
+                offset += contentLength;
+
+                files.push({ path, content });
+            }
+
+            return files;
+        }
+
+        // Main encryption function
+        async function encryptFile() {
+            const password1 = document.getElementById('encryptPassword1').value;
+            const password2 = document.getElementById('encryptPassword2').value;
+            
+            if (!password1) {
+                alert('Please enter a password');
+                return;
+            }
+
+            if (encryptLayer === 'double' && !password2) {
+                alert('Please enter both passwords for double-layer encryption');
+                return;
+            }
+
+            if (encryptLayer === 'double' && password1 === password2) {
+                alert('Passwords must be different for double-layer encryption');
+                return;
+            }
+
+            let fileToEncrypt;
+            let fileName;
+            let fileData;
+
+            if (encryptMode === 'file') {
+                const fileInput = document.getElementById('encryptFileInput');
+                if (!fileInput.files.length) {
+                    alert('Please select a file');
+                    return;
+                }
+                fileToEncrypt = fileInput.files[0];
+                fileName = fileToEncrypt.name;
+            } else {
+                const folderInput = document.getElementById('encryptFolderInput');
+                if (!folderInput.files.length) {
+                    alert('Please select a folder');
+                    return;
+                }
+                const files = Array.from(folderInput.files);
+                fileName = files[0].webkitRelativePath.split('/')[0];
+                
+                updateProgress('encrypt', 10, 'Creating archive...');
+                fileData = await createArchive(files);
+            }
+
+            const btn = document.getElementById('encryptBtn');
+            btn.disabled = true;
+
+            try {
+                updateProgress('encrypt', 30, 'Reading file...');
+                
+                if (!fileData) {
+                    fileData = await fileToEncrypt.arrayBuffer();
+                    fileData = new Uint8Array(fileData);
+                }
+
+                updateProgress('encrypt', 50, 'Encrypting (layer 1)...');
+                let encrypted = await encryptData(fileData, password1);
+
+                if (encryptLayer === 'double') {
+                    updateProgress('encrypt', 75, 'Encrypting (layer 2)...');
+                    encrypted = await encryptData(encrypted, password2);
+                }
+
+                updateProgress('encrypt', 90, 'Preparing download...');
+                
+                const extension = encryptLayer === 'double' ? '.enc2' : '.enc';
+                const blob = new Blob([encrypted], { type: 'application/octet-stream' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName + extension;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                updateProgress('encrypt', 100, 'Complete!');
+
+                // Clear inputs
+                document.getElementById('encryptPassword1').value = '';
+                document.getElementById('encryptPassword2').value = '';
+                document.getElementById('encryptFileInput').value = '';
+                document.getElementById('encryptFolderInput').value = '';
+                document.getElementById('encryptFileName').textContent = '';
+                document.getElementById('encryptInputArea').classList.remove('has-file');
+                document.getElementById('encryptFileList').innerHTML = '';
+
+                // Show reminder if checked
+                if (document.getElementById('remindDeleteOriginal').checked) {
+                    setTimeout(() => {
+                        document.getElementById('deleteOriginalModal').classList.add('active');
+                    }, 500);
+                }
+
+            } catch (error) {
+                alert('Encryption failed: ' + error.message);
+                updateProgress('encrypt', 0, '');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // Main decryption function
+        async function decryptFile() {
+            const fileInput = document.getElementById('decryptFileInput');
+            if (!fileInput.files.length) {
+                alert('Please select an encrypted file');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const isDouble = file.name.endsWith('.enc2');
+            const password1 = document.getElementById('decryptPassword1').value;
+            const password2 = document.getElementById('decryptPassword2').value;
+
+            if (!password1) {
+                alert('Please enter the password');
+                return;
+            }
+
+            if (isDouble && !password2) {
+                alert('Please enter both passwords');
+                return;
+            }
+
+            const btn = document.getElementById('decryptBtn');
+            btn.disabled = true;
+
+            try {
+                updateProgress('decrypt', 20, 'Reading encrypted file...');
+                let encryptedData = await file.arrayBuffer();
+                encryptedData = new Uint8Array(encryptedData);
+
+                if (isDouble) {
+                    updateProgress('decrypt', 40, 'Decrypting (layer 2)...');
+                    encryptedData = new Uint8Array(await decryptData(encryptedData, password2));
+                    
+                    updateProgress('decrypt', 60, 'Decrypting (layer 1)...');
+                    encryptedData = new Uint8Array(await decryptData(encryptedData, password1));
+                } else {
+                    updateProgress('decrypt', 50, 'Decrypting...');
+                    encryptedData = new Uint8Array(await decryptData(encryptedData, password1));
+                }
+
+                updateProgress('decrypt', 80, 'Processing result...');
+
+                // Check if it's an archive (folder)
+                const view = new DataView(encryptedData.buffer);
+                const maybeFileCount = view.getUint32(0, true);
+                
+                // Simple heuristic: if first 4 bytes represent a reasonable file count (1-10000)
+                const isArchive = maybeFileCount > 0 && maybeFileCount < 10000 && encryptedData.length > 100;
+
+                if (isArchive) {
+                    try {
+                        const files = extractArchive(encryptedData);
+                        decryptedFolderFiles = files;
+                        
+                        updateProgress('decrypt', 100, 'Complete!');
+                        
+                        // Show folder browser modal
+                        const fileList = document.getElementById('fileBrowserList');
+                        fileList.innerHTML = files.map((f, i) => `
+                            <div class="file-browser-item">
+                                <input type="checkbox" id="file_${i}" checked>
+                                <div class="file-info">
+                                    <div class="file-path">${f.path}</div>
+                                    <div class="file-size">${formatFileSize(f.content.length)}</div>
+                                </div>
+                                <button class="download-btn-small" onclick="downloadSingleFile(${i})">💾 Download</button>
+                            </div>
+                        `).join('');
+                        
+                        setTimeout(() => {
+                            document.getElementById('folderBrowserModal').classList.add('active');
+                        }, 500);
+                    } catch (e) {
+                        // Not an archive, treat as single file
+                        downloadSingleDecryptedFile(encryptedData, file.name);
+                    }
+                } else {
+                    // Single file
+                    downloadSingleDecryptedFile(encryptedData, file.name);
+                }
+
+                // Clear inputs
+                document.getElementById('decryptPassword1').value = '';
+                document.getElementById('decryptPassword2').value = '';
+                document.getElementById('decryptFileInput').value = '';
+                document.getElementById('decryptFileName').textContent = '';
+                document.getElementById('decryptInputArea').classList.remove('has-file');
+                document.getElementById('decryptPassword1Group').style.display = 'none';
+                document.getElementById('decryptPassword2Group').style.display = 'none';
+
+                // Show reminder if checked and not folder
+                if (!isArchive && document.getElementById('remindDeleteEncrypted').checked) {
+                    setTimeout(() => {
+                        document.getElementById('deleteEncryptedModal').classList.add('active');
+                    }, 1000);
+                }
+
+            } catch (error) {
+                alert('Decryption failed: ' + error.message + '\nPlease check your password(s).');
+                updateProgress('decrypt', 0, '');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function downloadSingleDecryptedFile(data, encryptedFileName) {
+            updateProgress('decrypt', 90, 'Preparing download...');
+            
+            // Remove .enc or .enc2 extension
+            let originalName = encryptedFileName.replace(/\.enc2?$/, '');
+            
+            const blob = new Blob([data], { type: 'application/octet-stream' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = originalName;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            updateProgress('decrypt', 100, 'Complete!');
+        }
+
+        function downloadSingleFile(index) {
+            const file = decryptedFolderFiles[index];
+            const blob = new Blob([file.content], { type: 'application/octet-stream' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = file.path.split('/').pop(); // Get filename from path
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function selectAllFiles() {
+            document.querySelectorAll('#fileBrowserList input[type="checkbox"]').forEach(cb => cb.checked = true);
+        }
+
+        function deselectAllFiles() {
+            document.querySelectorAll('#fileBrowserList input[type="checkbox"]').forEach(cb => cb.checked = false);
+        }
+
+        function downloadSelectedFiles() {
+            const checkboxes = document.querySelectorAll('#fileBrowserList input[type="checkbox"]');
+            let downloaded = 0;
+            const selectedIndexes = [];
+            
+            checkboxes.forEach((cb, index) => {
+                if (cb.checked) {
+                    selectedIndexes.push(index);
+                }
+            });
+
+            if (selectedIndexes.length === 0) {
+                alert('Please select at least one file');
+                return;
+            }
+
+            // Download files with longer delays to prevent browser blocking
+            selectedIndexes.forEach((index, i) => {
+                setTimeout(() => {
+                    downloadSingleFile(index);
+                    downloaded++;
+                    
+                    // Close modal after all downloads complete
+                    if (downloaded === selectedIndexes.length) {
+                        setTimeout(() => {
+                            closeModal('folderBrowserModal');
+                            if (document.getElementById('remindDeleteEncrypted').checked) {
+                                document.getElementById('deleteEncryptedModal').classList.add('active');
+                            }
+                        }, 300);
+                    }
+                }, i * 500); // Increased to 500ms between downloads
+            });
+        }
+
+        // Modal functions
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                closeModal(e.target.id);
+            }
+        });
+
+        // User manual
+        function openManual() {
+            const manualContent = `
+                <h1 style="font-family: 'Syne', sans-serif; font-size: 2rem; margin-bottom: 0.5rem;">🔐 <span style="background: linear-gradient(135deg, #0d7377, #2a9d8f); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">User Manual</span></h1>
+                <p style="color: #888; margin-bottom: 1.5rem; font-size: 0.9rem;">Advanced File & Folder Encryptor v1.0</p>
+                
+                <div style="background: rgba(13, 115, 119, 0.15); border: 1px solid #0d7377; border-radius: 12px; padding: 1rem; margin: 1rem 0;">
+                    <strong style="color: #14b8a6;">Key Features:</strong>
+                    <ul style="margin: 0.5rem 0 0 1.5rem; color: #b0b0b0; font-size: 0.9rem;">
+                        <li>AES-256-GCM encryption (military-grade)</li>
+                        <li>Single file & folder support with structure preservation</li>
+                        <li>Single or double-layer encryption</li>
+                        <li>Two-Person Integrity (TPI) mode for split custody</li>
+                        <li>100% client-side - no data leaves your device</li>
+                    </ul>
+                </div>
+
+                <h2 style="font-family: 'Syne', sans-serif; font-size: 1.4rem; color: #14b8a6; margin: 1.5rem 0 0.75rem; border-bottom: 2px solid #0d7377; padding-bottom: 0.3rem;">Quick Start</h2>
+                
+                <h3 style="font-family: 'Syne', sans-serif; font-size: 1.1rem; color: #2a9d8f; margin: 1rem 0 0.5rem;">Encryption</h3>
+                <ol style="margin: 0 0 1rem 1.5rem; color: #b0b0b0; font-size: 0.9rem; line-height: 1.6;">
+                    <li>Select <strong>Single File</strong> or <strong>Folder</strong> mode</li>
+                    <li>Click input area to browse and select your file/folder</li>
+                    <li>Choose encryption strength: <strong>Single Layer</strong> (1 password) or <strong>Double Layer</strong> (2 passwords)</li>
+                    <li>Enter strong password(s) - minimum 8 characters, 12+ recommended</li>
+                    <li>Click <strong>Encrypt</strong> - encrypted file downloads as .enc or .enc2</li>
+                    <li>Delete original files after encryption for security</li>
+                </ol>
+
+                <h3 style="font-family: 'Syne', sans-serif; font-size: 1.1rem; color: #2a9d8f; margin: 1rem 0 0.5rem;">Decryption</h3>
+                <ol style="margin: 0 0 1rem 1.5rem; color: #b0b0b0; font-size: 0.9rem; line-height: 1.6;">
+                    <li>Select your .enc or .enc2 file (tool auto-detects type)</li>
+                    <li>Enter password(s) - for .enc2, enter Password 2 (outer) then Password 1 (inner)</li>
+                    <li>Click <strong>Decrypt</strong></li>
+                    <li>For folders: browse and select files to download individually or in batch</li>
+                </ol>
+
+                <h2 style="font-family: 'Syne', sans-serif; font-size: 1.4rem; color: #14b8a6; margin: 1.5rem 0 0.75rem; border-bottom: 2px solid #0d7377; padding-bottom: 0.3rem;">Security Details</h2>
+                
+                <table style="width: 100%; border-collapse: collapse; margin: 1rem 0; background: #333; border-radius: 8px; overflow: hidden; font-size: 0.85rem;">
+                    <tr style="background: #0d7377;">
+                        <th style="padding: 0.75rem; text-align: left; color: white;">Component</th>
+                        <th style="padding: 0.75rem; text-align: left; color: white;">Specification</th>
+                    </tr>
+                    <tr><td style="padding: 0.75rem; border-bottom: 1px solid #404040; color: #e8e8e8;">Algorithm</td><td style="padding: 0.75rem; border-bottom: 1px solid #404040; color: #b0b0b0;">AES-256-GCM</td></tr>
+                    <tr><td style="padding: 0.75rem; border-bottom: 1px solid #404040; color: #e8e8e8;">Key Derivation</td><td style="padding: 0.75rem; border-bottom: 1px solid #404040; color: #b0b0b0;">PBKDF2-SHA-256</td></tr>
+                    <tr><td style="padding: 0.75rem; border-bottom: 1px solid #404040; color: #e8e8e8;">Iterations</td><td style="padding: 0.75rem; border-bottom: 1px solid #404040; color: #b0b0b0;">600,000</td></tr>
+                    <tr><td style="padding: 0.75rem; border-bottom: 1px solid #404040; color: #e8e8e8;">Salt & Nonce</td><td style="padding: 0.75rem; border-bottom: 1px solid #404040; color: #b0b0b0;">32-byte salt, 12-byte nonce (per layer)</td></tr>
+                    <tr><td style="padding: 0.75rem; color: #e8e8e8;">File Format</td><td style="padding: 0.75rem; color: #b0b0b0;">[salt][nonce][encrypted data+tag]</td></tr>
+                </table>
+
+                <div style="background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; border-radius: 12px; padding: 1rem; margin: 1rem 0; font-size: 0.9rem;">
+                    <strong style="color: #f59e0b;">⚠️ Encryption Layers:</strong>
+                    <ul style="margin: 0.5rem 0 0 1.5rem; color: #b0b0b0;">
+                        <li><strong>Single Layer (.enc):</strong> 1 password, fast, ideal for personal files</li>
+                        <li><strong>Double Layer (.enc2):</strong> 2 different passwords required, TPI mode support, double encryption passes</li>
+                    </ul>
+                </div>
+
+                <h2 style="font-family: 'Syne', sans-serif; font-size: 1.4rem; color: #14b8a6; margin: 1.5rem 0 0.75rem; border-bottom: 2px solid #0d7377; padding-bottom: 0.3rem;">Two-Person Integrity (TPI)</h2>
+                
+                <p style="color: #b0b0b0; margin-bottom: 0.75rem; font-size: 0.9rem; line-height: 1.6;"><span style="color: #14b8a6; font-weight: 600;">TPI mode</span> requires two people to decrypt - neither person can access data alone. Perfect for shared custody scenarios.</p>
+                
+                <p style="color: #b0b0b0; margin-bottom: 0.5rem; font-size: 0.9rem;"><strong style="color: #14b8a6;">Use Cases:</strong></p>
+                <ul style="margin: 0 0 1rem 1.5rem; color: #b0b0b0; font-size: 0.85rem; line-height: 1.5;">
+                    <li>Business: CEO + CFO for financial records</li>
+                    <li>Legal: Two attorneys for sensitive case files</li>
+                    <li>Crypto: Split wallet key custody</li>
+                    <li>Family: Two trustees for important documents</li>
+                </ul>
+
+                <p style="color: #b0b0b0; margin-bottom: 0.5rem; font-size: 0.9rem;"><strong style="color: #14b8a6;">Setup:</strong> Choose Double Layer, Person A sets Password 1, Person B sets Password 2. Both passwords required to decrypt.</p>
+
+                <h2 style="font-family: 'Syne', sans-serif; font-size: 1.4rem; color: #14b8a6; margin: 1.5rem 0 0.75rem; border-bottom: 2px solid #0d7377; padding-bottom: 0.3rem;">Best Practices</h2>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0;">
+                    <div>
+                        <p style="color: #10b981; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem;">✅ Do:</p>
+                        <ul style="margin: 0 0 0 1.5rem; color: #b0b0b0; font-size: 0.85rem; line-height: 1.5;">
+                            <li>Use 12+ character passwords</li>
+                            <li>Mix uppercase, lowercase, numbers, symbols</li>
+                            <li>Delete originals after encryption</li>
+                            <li>Test decryption before deleting</li>
+                            <li>Keep backup copies of encrypted files</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <p style="color: #ef4444; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem;">❌ Don't:</p>
+                        <ul style="margin: 0 0 0 1.5rem; color: #b0b0b0; font-size: 0.85rem; line-height: 1.5;">
+                            <li>Use common words or personal info</li>
+                            <li>Reuse passwords from other services</li>
+                            <li>Store passwords with encrypted files</li>
+                            <li>Use same password for double-layer</li>
+                            <li>Close browser during encryption</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h2 style="font-family: 'Syne', sans-serif; font-size: 1.4rem; color: #14b8a6; margin: 1.5rem 0 0.75rem; border-bottom: 2px solid #0d7377; padding-bottom: 0.3rem;">Troubleshooting</h2>
+                
+                <p style="color: #b0b0b0; margin: 0.5rem 0; font-size: 0.9rem;"><strong style="color: #14b8a6;">Q: Decryption fails?</strong></p>
+                <p style="color: #888; margin: 0 0 1rem 1rem; font-size: 0.85rem;">Check password typos, Caps Lock, and correct password order for .enc2 files (Password 2 first, then Password 1).</p>
+                
+                <p style="color: #b0b0b0; margin: 0.5rem 0; font-size: 0.9rem;"><strong style="color: #14b8a6;">Q: Folder browser doesn't appear?</strong></p>
+                <p style="color: #888; margin: 0 0 1rem 1rem; font-size: 0.85rem;">Ensure pop-ups aren't blocked. Try refreshing and decrypting again.</p>
+                
+                <p style="color: #b0b0b0; margin: 0.5rem 0; font-size: 0.9rem;"><strong style="color: #14b8a6;">Q: Slow encryption?</strong></p>
+                <p style="color: #888; margin: 0 0 1rem 1rem; font-size: 0.85rem;">Normal for large files. Watch progress bar and don't close browser.</p>
+
+                <hr style="border: none; border-top: 1px solid #404040; margin: 2rem 0 1rem;">
+
+                <p style="text-align: center; color: #888; font-size: 0.85rem;">
+                    Created by <a href="https://github.com/BLK3L53Y" target="_blank" style="color: #14b8a6; text-decoration: none;">BLK3L53Y · GitHub</a> | v1.0 | 100% Client-Side Encryption
+                </p>
+            `;
+
+            document.getElementById('manualContent').innerHTML = manualContent;
+            document.getElementById('manualModal').classList.add('active');
+        }
+    </script>
+</body>
+</html>
