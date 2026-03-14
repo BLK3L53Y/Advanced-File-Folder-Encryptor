@@ -49,7 +49,7 @@ open Advanced_File___Folder_Encryptor.html
 ```
 
 ### Option 3: GitHub Pages
-Visit the live version at: `https://blk3l53y.github.io/advanced-file-folder-encryptor/`
+Visit the live version at: `https://blk3l53y.github.io/index/`
 
 ## 📖 Usage Guide
 
